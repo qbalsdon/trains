@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:typ="http://thalesgroup.com/RTTI/2013-11-28/Token/types" xmlns:ldb="http://thalesgroup.com/RTTI/2016-02-16/ldb/">
+   <soap:Header>
+      <typ:AccessToken>
+         <typ:TokenValue>__TOKEN__</typ:TokenValue>
+      </typ:AccessToken>
+   </soap:Header>
+   <soap:Body>
+      <ldb:GetServiceDetailsRequest>
+         <ldb:serviceID>1389996LEWISHM_</ldb:serviceID>
+      </ldb:GetServiceDetailsRequest>
+   </soap:Body>
+</soap:Envelope>
+

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://thalesgroup.com/RTTI/2014-02-20/ldb/" xmlns:ns2="http://thalesgroup.com/RTTI/2010-11-01/ldb/commontypes">
+  <SOAP-ENV:Header>
+    <ns2:AccessToken>
+      <ns2:TokenValue>__TOKEN__</ns2:TokenValue>
+    </ns2:AccessToken>
+  </SOAP-ENV:Header>
+  <SOAP-ENV:Body>
+    <ns1:GetDepartureBoardRequest>
+      <ns1:numRows>10</ns1:numRows>
+      <ns1:crs>__ORIGIN__</ns1:crs>
+      <ns1:filterCrs>__DESTINATION__</ns1:filterCrs>
+      <ns1:filterType>to</ns1:filterType>
+      <ns1:timeOffset>0</ns1:timeOffset>
+      <ns1:timeWindow>120</ns1:timeWindow>
+    </ns1:GetDepartureBoardRequest>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
