@@ -17,6 +17,11 @@ function readPayloadWithDetails() {
     return util.readFile(payloadPath);
 }
 
+function readPayload2WithDetails() {
+    const payloadPath = path.join(__dirname, 'data', 'payload_details_2.soap');
+    return util.readFile(payloadPath);
+}
+
 function readParsedPayload() {
     const payloadPath = path.join(__dirname, 'data', 'parsed.json');
     return util.readFile(payloadPath);
@@ -50,5 +55,16 @@ test('when given a payload can parse', () => {
         })
         .catch((error) => {
             expect().fail('should be parse-able');
+        });
+  });
+
+  test('when given a detailed payload can get the list of services', () => {
+    trainDataParser.getBoardWithServiceDetails(readPayload2WithDetails())
+        .then((result) => {
+            // console.log("WTAF " + result.length);
+            expect(result.length).toBe(9);
+        })
+        .catch((error) => {
+            expect(error).toBe("Test failed");
         });
   });

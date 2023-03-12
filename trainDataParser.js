@@ -1,12 +1,20 @@
 const parser = require('xml2js').parseString;
+const stripNS = require('xml2js').processors.stripPrefix;
+
+function cleanUp(json) {
+  const result = {...json}; // create a shallow copy of the original object
+  delete result.Envelope["$"];
+  return result;
+}
 
 function parseXmlPayload(payload) {
     return new Promise((resolve, reject) => {
-      parser(payload, (err, result) => {
+      parser(payload, { tagNameProcessors: [stripNS] }, (err, result) => {
         if (err) {
           reject(err);
         } else {
-          resolve(JSON.stringify(result));
+          var response = cleanUp(result);
+          resolve(JSON.stringify(response));
         }
       });
     });
@@ -25,14 +33,14 @@ async function parseXml(xmlPayload) {
 async function getServices(xmlPayload) {
     try {
         const result = JSON.parse(await parseXmlPayload(xmlPayload));
-        const services = result['soap:Envelope']['soap:Body'][0]['GetDepartureBoardResponse'][0]['GetStationBoardResult'][0]['lt2:trainServices'][0]['lt2:service'];
+        const services = result["Envelope"]["Body"][0]['GetDepartureBoardResponse'][0]['GetStationBoardResult'][0]['trainServices'][0]['service'];
         const serviceInfo = services.map(service => {
             return {
-              departureTime: service["lt2:std"][0],
-              origin: service["lt2:origin"][0]["lt2:location"][0]["lt2:locationName"][0],
-              destination: service["lt2:destination"][0]["lt2:location"][0]["lt2:locationName"][0],
-              platform: service["lt2:platform"][0],
-              serviceID: service['lt2:serviceID'][0]
+              departureTime: service["std"][0],
+              origin: service["origin"][0]["location"][0]["locationName"][0],
+              destination: service["destination"][0]["location"][0]["locationName"][0],
+              platform: service["platform"][0],
+              serviceID: service['serviceID'][0]
             }
           });
         return serviceInfo;
@@ -42,22 +50,32 @@ async function getServices(xmlPayload) {
     }
 }
 
+
 async function getBoardWithServiceDetails(xmlPayload) {
     try {
+      console.log(xmlPayload);
         const result = JSON.parse(await parseXmlPayload(xmlPayload));
-        const serviceDetails = result['soap:Envelope']['soap:Body'][0]['GetDepBoardWithDetailsResponse'][0]['GetStationBoardResult'][0];
-        const serviceInfoList = serviceDetails['lt5:trainServices'][0]['lt5:service'];
-        
+        const serviceDetails = result['Envelope']['Body'][0]['GetDepBoardWithDetailsResponse'][0]['GetStationBoardResult'][0];        
+        const serviceInfoList = serviceDetails['trainServices'][0]['service'];   
         const serviceInfo = serviceInfoList.map(service => {
-            return {
-                departureTime: service['lt4:std'][0],
-                origin: service['lt5:origin'][0]['lt4:location'][0]['lt4:crs'][0],
-                destination: service['lt5:destination'][0]['lt4:location'][0]['lt4:crs'][0],
-                platform: service['lt4:platform'][0],
-                serviceID: service['lt4:serviceID'][0],
-                intermediateStops: service['lt5:subsequentCallingPoints'][0]['lt4:callingPointList'][0]['lt4:callingPoint'].map(stop => stop['lt4:crs'][0])
-            }
+              const element = {
+                departureTime: service.std[0],
+                origin: service.origin[0].location[0].locationName[0],
+                destination: service.destination[0].location[0].locationName[0],
+                platform: service.platform ? service.platform[0] : 'Unknown',
+                serviceID: service.serviceID[0],
+                intermediateStops: service.subsequentCallingPoints[0].callingPointList[0].callingPoint.map(stop => ({
+                  locationName: stop.locationName[0],
+                  crs: stop.crs[0],
+                  st: stop.st[0],
+                  et: stop.et[0]
+                }))
+              };
+              // console.log(JSON.stringify(element));
+              // console.log("!!-------------------------------!!");
+            return element;
           });
+        // console.log(JSON.stringify(serviceInfo));
         return serviceInfo;
     } catch (err) {
         console.error(err);

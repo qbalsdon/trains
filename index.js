@@ -51,16 +51,48 @@ function trainDataRequest() {
     });
 }
 
+function filter(data) {
+    return data;
+}
+
+function produceHtmlTable(data) {
+    const row = "<tr><td>PLATFORM</td><td>DEPARTURE TIME</td><td>ORIGIN</td><td>DESTINATION</td><td>STOPS</td></tr>"
+    var response = "<table>" + row;
+
+    for (let index = 0; index < data.length; index++) {
+        const element = data[index];
+        var stops = "";
+        var between = "";
+        for (let stopIndex = 0; stopIndex < element.intermediateStops.length; stopIndex++) {
+            const stopElement = element.intermediateStops[stopIndex];
+            stops +=  between + stopElement.crs;
+            between = " --> "
+        }
+        if (stops.includes(DESTINATION)) {
+            response += row
+                .replace("PLATFORM", element.platform)
+                .replace("DEPARTURE TIME", element.departureTime)
+                .replace("ORIGIN", element.origin)
+                .replace("DESTINATION", element.destination)
+                .replace("STOPS", stops)
+        }
+    }
+
+    return response + "</table>";
+}
+
 function sendSuccess(res, responseData) {
     fs.readFile("templates/index.html", 'utf8', function (err, pageTemplate) {
-        if (err)
+        if (err) {
+            res.writeHead(501, { 'Content-Type': 'text/html' });
             res.write("HEAD.HTML NOT FOUND");
-        else {
-            // console.log(pageTemplate);
-            const filteredArray = responseData.filter(element => element.intermediateStops.includes(DESTINATION));
-            const diagramData = nomnomTrainBuilder.convertPayload(ORIGIN,filteredArray);
+        } else {
+            console.log(responseData);
+            //const filteredArray = responseData.filter(element => element.intermediateStops.includes(DESTINATION));
+            //const diagramData = nomnomTrainBuilder.convertPayload(ORIGIN,responseData);
             // console.log(filteredArray);
-            const pageData = pageTemplate.replace("__DIAGRAM__", diagramData.join(";"));
+            const pageData = pageTemplate
+                .replace("__TABLE_DATA__", produceHtmlTable(filter(responseData)));
             res.writeHead(200, { 'Content-Type': 'text/html' });
             res.write(pageData);            
         }
@@ -86,11 +118,10 @@ app.get('/', function(req, res) {
     trainDataRequest().then(responseData => {
         trainDataParser.getBoardWithServiceDetails(responseData)
         .then((result) => {
-            // console.log(result);
             sendSuccess(res, result);
         })
         .catch((error) => {
-            console.error(error);
+            console.error(" !! " + error);
             sendError(res);
         });
     }).catch(error => {

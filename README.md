@@ -12,6 +12,13 @@ sed "s/__TOKEN__/$NR_TOKEN/g" requests/getDepartureBoard | sed "s/__ORIGIN__/LEW
 sed "s/__TOKEN__/$NR_TOKEN/g" requests/getDepartureBoardWithDetails | sed "s/__ORIGIN__/LEW/g" | sed "s/__DESTINATION__/LBG/g" | curl -X POST https://lite.realtime.nationalrail.co.uk/OpenLDBWS/ldb9.asmx -H "Content-Type: text/xml" -H "Accept: text/xml" --data-binary @-
 ```
 
+# TODO
+- Add any information data (delays, adhoc)
+- Improve the table
+- Remove the Diagram
+- Deploy
+- Show bus info?
+
 # Resources
 
 https://wiki.openraildata.com/index.php?title=OpenLDBWS_SOAP_Query_Raw
